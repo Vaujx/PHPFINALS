@@ -1,0 +1,171 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PHP MySQL CRUD Reviewer</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; background-color: #f9f9f9; }
+    h1, h2, h3 { color: #2c3e50; }
+    code { background-color: #eee; padding: 2px 4px; border-radius: 4px; display: block; white-space: pre-wrap; }
+    section { margin-bottom: 30px; }
+  </style>
+</head>
+<body>
+  <h1>PHP and MySQL CRUD Reviewer</h1>
+
+  <section>
+    <h2>1. Creating a Database in phpMyAdmin</h2>
+    <ol>
+      <li>Go to <strong>phpMyAdmin</strong> (e.g., <code>http://localhost/phpmyadmin</code>).</li>
+      <li>Click <strong>New</strong> on the sidebar.</li>
+      <li>Enter a name (e.g., <code>student_system</code>).</li>
+      <li>Click <strong>Create</strong>.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>2. Creating a Table</h2>
+    <ol>
+      <li>Select your database (<code>student_system</code>).</li>
+      <li>Enter a table name (e.g., <code>students</code>).</li>
+      <li>Create columns: <code>id</code> (INT, AUTO_INCREMENT, PRIMARY), <code>name</code> (VARCHAR), <code>email</code> (VARCHAR), <code>course</code> (VARCHAR).</li>
+      <li>Click <strong>Save</strong>.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>3. SQL Scripts</h2>
+    <h3>Create Table</h3>
+    <code>
+CREATE TABLE students (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100),
+    course VARCHAR(100)
+);
+    </code>
+
+    <h3>Insert Data</h3>
+    <code>
+INSERT INTO students (name, email, course) 
+VALUES ('Juan Dela Cruz', 'juan@example.com', 'BSIT');
+    </code>
+
+    <h3>Select Data</h3>
+    <code>
+SELECT * FROM students;
+    </code>
+
+    <h3>Update Data</h3>
+    <code>
+UPDATE students SET course = 'BSCS' WHERE id = 1;
+    </code>
+
+    <h3>Delete Data</h3>
+    <code>
+DELETE FROM students WHERE id = 1;
+    </code>
+  </section>
+
+  <section>
+    <h2>4. Connecting PHP to MySQL</h2>
+    <code>
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$database = "student_system";
+
+$conn = new mysqli($servername, $username, $password, $database);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+echo "Connected successfully!";
+?>
+    </code>
+  </section>
+
+  <section>
+    <h2>5. CRUD PHP Application Example</h2>
+    <h3>HTML Form</h3>
+    <code>
+<form action="create.php" method="post">
+  Name: <input type="text" name="name"><br>
+  Email: <input type="email" name="email"><br>
+  Course: <input type="text" name="course"><br>
+  <input type="submit" value="Add Student">
+</form>
+    </code>
+
+    <h3>create.php</h3>
+    <code>
+<?php
+$conn = new mysqli("localhost", "root", "", "student_system");
+if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+
+$name = $_POST['name'];
+$email = $_POST['email'];
+$course = $_POST['course'];
+
+$stmt = $conn->prepare("INSERT INTO students (name, email, course) VALUES (?, ?, ?)");
+$stmt->bind_param("sss", $name, $email, $course);
+$stmt->execute();
+
+echo "Student added!";
+$stmt->close();
+$conn->close();
+?>
+    </code>
+
+    <h3>read.php</h3>
+    <code>
+<?php
+$conn = new mysqli("localhost", "root", "", "student_system");
+$result = $conn->query("SELECT * FROM students");
+
+while($row = $result->fetch_assoc()) {
+  echo $row['id'] . " - " . $row['name'] . " - " . $row['email'] . " - " . $row['course'] . "<br>";
+}
+$conn->close();
+?>
+    </code>
+
+    <h3>update.php</h3>
+    <code>
+<?php
+$conn = new mysqli("localhost", "root", "", "student_system");
+$id = 1;
+$new_course = "BSCS";
+
+$stmt = $conn->prepare("UPDATE students SET course=? WHERE id=?");
+$stmt->bind_param("si", $new_course, $id);
+$stmt->execute();
+
+echo "Student updated!";
+$stmt->close();
+$conn->close();
+?>
+    </code>
+
+    <h3>delete.php</h3>
+    <code>
+<?php
+$conn = new mysqli("localhost", "root", "", "student_system");
+$id = 1;
+
+$stmt = $conn->prepare("DELETE FROM students WHERE id=?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+
+echo "Student deleted!";
+$stmt->close();
+$conn->close();
+?>
+    </code>
+  </section>
+
+</body>
+</html>
